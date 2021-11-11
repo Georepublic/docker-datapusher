@@ -23,7 +23,12 @@ ENV PATH /home/${DATAPUSHER_USER}/.local/bin:${PATH}
 ENV GITHUB_URL https://raw.githubusercontent.com/Georepublic/datapusher/feature/support-external-ckan-host
 
 RUN apt update \
- && apt install -y locales \
+ && apt install -y \
+    locales \
+    libxslt1-dev \
+    libxml2-dev \
+    libffi-dev \
+    libmagic-dev \
  && rm -rf /var/lib/apt/lists/*
 RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
 RUN locale-gen
