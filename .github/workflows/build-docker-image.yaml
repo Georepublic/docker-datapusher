@@ -8,6 +8,8 @@ on:
 env:
   IMAGE_NAME: datapusher
   AWS_REGION: ${{secrets.AWS_REGION}}
+  ECR_BASE: ${{secrets.ECR_BASE}}
+  ECR_REPO: ${{secrets.ECR_REPO}}
 
 jobs:
   build:
@@ -36,6 +38,10 @@ jobs:
           role-session-name: ECRSession
           aws-region: ${{env.AWS_REGION}}
       
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      
       - name: Login to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       
@@ -47,6 +53,8 @@ jobs:
           SHORT_HASH=$(git rev-parse --short HEAD)
           IMAGE_TAG=${BUILT_DATE}-${SHORT_HASH}
           docker tag ${IMAGE_NAME} ${IMAGE_ID}:${IMAGE_TAG}
-          docker tag ${IMAGE_NAME} ${IMAGE_ID}:latest
           docker push ${IMAGE_ID}:${IMAGE_TAG}
+          docker tag ${IMAGE_NAME} ${IMAGE_ID}:latest
           docker push ${IMAGE_ID}:latest
+          docker tag ${IMAGE_NAME} ${ECR_BASE}/${ECR_REPO}:${IMAGE_TAG}
+          docker push ${ECR_BASE}/${ECR_REPO}:${IMAGE_TAG}
