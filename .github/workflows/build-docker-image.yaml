@@ -7,11 +7,13 @@ on:
 
 env:
   IMAGE_NAME: datapusher
+  AWS_REGION: ${{secrets.AWS_REGION}}
 
 jobs:
   build:
     runs-on: ubuntu-20.04
     permissions:
+      id-token: write
       packages: write
       contents: read
 
@@ -24,6 +26,13 @@ jobs:
 
       - name: Build docker image
         run: docker build -t ${IMAGE_NAME} .
+      
+      - name: Get AWS Credential
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: ${{secrets.ROLE_ARN}}
+          role-session-name: samplerolesession
+          aws-region: ${{env.AWS_REGION}}
       
       - name: Login to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
