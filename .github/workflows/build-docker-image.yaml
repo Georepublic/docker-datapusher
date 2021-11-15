@@ -36,10 +36,10 @@ jobs:
           BUILT_DATE=$(date "+%Y%m%e")
           SHORT_HASH=$(git rev-parse --short HEAD)
           IMAGE_TAG=${BUILT_DATE}-${SHORT_HASH}
-          docker tag ${IMAGE_NAME} ${IMAGE_ID}:latest
-          docker push ${IMAGE_NAME} ${IMAGE_ID}:latest
           docker tag ${IMAGE_NAME} ${IMAGE_ID}:${IMAGE_TAG}
+          docker tag ${IMAGE_NAME} ${IMAGE_ID}:latest
           docker push ${IMAGE_ID}:${IMAGE_TAG}
+          docker push ${IMAGE_ID}:latest
   
   pushToECR:
     runs-on: ubuntu-20.04
