@@ -54,7 +54,5 @@ jobs:
           IMAGE_TAG=${BUILT_DATE}-${SHORT_HASH}
           docker tag ${IMAGE_NAME} ${IMAGE_ID}:${IMAGE_TAG}
           docker push ${IMAGE_ID}:${IMAGE_TAG}
-          docker tag ${IMAGE_NAME} ${IMAGE_ID}:latest
-          docker push ${IMAGE_ID}:latest
           docker tag ${IMAGE_NAME} ${ECR_BASE}/${ECR_REPO}:${IMAGE_TAG}
           docker push ${ECR_BASE}/${ECR_REPO}:${IMAGE_TAG}
