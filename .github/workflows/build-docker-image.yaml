@@ -5,19 +5,14 @@ on:
     branches:
       - main
 
-env:
-  IMAGE_NAME: datapusher
-  AWS_REGION: ${{secrets.AWS_REGION}}
-  ECR_BASE: ${{secrets.ECR_BASE}}
-  ECR_REPO: ${{secrets.ECR_REPO}}
-
 jobs:
   build:
     runs-on: ubuntu-20.04
     permissions:
-      id-token: write
       packages: write
       contents: read
+    env:
+      IMAGE_NAME: datapusher
 
     steps:
       - uses: actions/checkout@v2
@@ -31,17 +26,6 @@ jobs:
       - name: Build docker image
         run: docker build -t ${IMAGE_NAME} .
       
-      - name: Get AWS Credential
-        uses: aws-actions/configure-aws-credentials@master
-        with:
-          role-to-assume: ${{secrets.ROLE_ARN}}
-          role-session-name: ECRSession
-          aws-region: ${{env.AWS_REGION}}
-      
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-      
       - name: Login to registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       
@@ -52,7 +36,44 @@ jobs:
           BUILT_DATE=$(date "+%Y%m%e")
           SHORT_HASH=$(git rev-parse --short HEAD)
           IMAGE_TAG=${BUILT_DATE}-${SHORT_HASH}
+          docker tag ${IMAGE_NAME} ${IMAGE_ID}:latest
+          docker push ${IMAGE_NAME} ${IMAGE_ID}:latest
           docker tag ${IMAGE_NAME} ${IMAGE_ID}:${IMAGE_TAG}
           docker push ${IMAGE_ID}:${IMAGE_TAG}
+  
+  pushToECR:
+    runs-on: ubuntu-20.04
+    permissions:
+      id-token: write
+      contents: read
+    needs: build
+    env:
+      IMAGE_NAME: ghcr.io/georepublic/datapusher:latest
+      AWS_REGION: ${{secrets.AWS_REGION}}
+      ECR_BASE: ${{secrets.ECR_BASE}}
+      ECR_REPO: ${{secrets.ECR_REPO}}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Get AWS Credential
+        uses: aws-actions/configure-aws-credentials@master
+        with:
+          role-to-assume: ${{secrets.ROLE_ARN}}
+          role-session-name: ECRSession
+          aws-region: ${{env.AWS_REGION}}
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Download Docker image
+        run: docker pull ${IMAGE_NAME}
+      
+      - name: Push Docker Image on ECR
+        run: |
+          BUILT_DATE=$(date "+%Y%m%e")
+          SHORT_HASH=$(git rev-parse --short HEAD)
+          IMAGE_TAG=${BUILT_DATE}-${SHORT_HASH}
           docker tag ${IMAGE_NAME} ${ECR_BASE}/${ECR_REPO}:${IMAGE_TAG}
           docker push ${ECR_BASE}/${ECR_REPO}:${IMAGE_TAG}
