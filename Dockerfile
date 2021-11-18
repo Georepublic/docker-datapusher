@@ -20,7 +20,7 @@ FROM python:3.8-slim
 ARG DATAPUSHER_USER
 ENV PYTHONUNBUFFERED 1
 ENV PATH /home/${DATAPUSHER_USER}/.local/bin:${PATH}
-ENV GITHUB_URL https://raw.githubusercontent.com/Georepublic/datapusher/feature/for_docker
+ENV GITHUB_URL https://raw.githubusercontent.com/Georepublic/datapusher/for_docker
 
 RUN apt update \
  && apt install -y \
