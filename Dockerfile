@@ -12,7 +12,7 @@ USER ${DATAPUSHER_USER}
 
 RUN pip install --user uwsgi xlrd==1.2.0
 RUN pip install --user -r "https://raw.githubusercontent.com/Georepublic/datapusher/master/requirements.txt"
-RUN pip install --user "git+https://github.com/Georepublic/datapusher.git@feature/support-external-ckan-host#egg=datapusher"
+RUN pip install --user "git+https://github.com/Georepublic/datapusher.git@for_docker#egg=datapusher"
 
 
 FROM python:3.8-slim
@@ -20,7 +20,7 @@ FROM python:3.8-slim
 ARG DATAPUSHER_USER
 ENV PYTHONUNBUFFERED 1
 ENV PATH /home/${DATAPUSHER_USER}/.local/bin:${PATH}
-ENV GITHUB_URL https://raw.githubusercontent.com/Georepublic/datapusher/feature/support-external-ckan-host
+ENV GITHUB_URL https://raw.githubusercontent.com/Georepublic/datapusher/feature/for_docker
 
 RUN apt update \
  && apt install -y \
